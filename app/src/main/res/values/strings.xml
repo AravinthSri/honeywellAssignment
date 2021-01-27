@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">HoneyWellAssignment</string>
+    <string name="search_articles">Search Articles</string>
+    <string name="search">Search</string>
+    <string name="enter_articles">Please the articles</string>
+    <string name="no_records">No records</string>
+</resources>
