@@ -1,4 +1,4 @@
-package com.honeywell.viewmodel
+package com.honeywell.assignment.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

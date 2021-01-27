@@ -18,8 +18,8 @@ import com.honeywell.assignment.api.RetrofitClient
 import com.honeywell.assignment.databinding.ActivitySearchBinding
 import com.honeywell.assignment.model.Hit
 import com.honeywell.assignment.view.adapter.SearchAdapter
-import com.honeywell.viewmodel.ArticlesViewModel
-import com.honeywell.viewmodel.ArticlesViewModelFactory
+import com.honeywell.assignment.viewmodel.ArticlesViewModel
+import com.honeywell.assignment.viewmodel.ArticlesViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -32,7 +32,7 @@ class ArticlesActivity:AppCompatActivity() {
     }
 
     lateinit var binding:ActivitySearchBinding
-    lateinit var viewmodel:ArticlesViewModel
+    lateinit var viewmodel: ArticlesViewModel
 
     val DIFF_CALLBACK: DiffUtil.ItemCallback<Hit> = object :
         DiffUtil.ItemCallback<Hit>(){
@@ -55,7 +55,7 @@ class ArticlesActivity:AppCompatActivity() {
     }
 
     private fun init(){
-        val factory=ArticlesViewModelFactory(RetrofitClient.retrofit())
+        val factory= ArticlesViewModelFactory(RetrofitClient.retrofit())
         viewmodel=ViewModelProvider(this,factory).get(ArticlesViewModel::class.java)
         getPagingDataAndFetchIntoRecyclerView()
     }
