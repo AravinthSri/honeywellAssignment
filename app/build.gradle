@@ -5,6 +5,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        rel {
+            storeFile file('/home/developer/Desktop/test.jks')
+            storePassword 'testtest'
+            keyAlias 'test'
+            keyPassword 'testtest'
+        }
+    }
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
 
@@ -13,9 +21,28 @@ android {
         minSdkVersion 16
         targetSdkVersion 30
         versionCode 1
-        versionName "1.0"
+        def version = getIncrementedVersionName()
+        versionName version
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    if(project.hasProperty("RELEASE_STORE_FILE")) {
+        signingConfigs {
+            release {
+                storeFile file(RELEASE_STORE_FILE)
+                storePassword RELEASE_STORE_PASSWORD
+                keyAlias RELEASE_KEY_ALIAS
+                keyPassword RELEASE_KEY_PASSWORD
+            }
+
+            debug {
+                storeFile file(RELEASE_STORE_FILE)
+                storePassword RELEASE_STORE_PASSWORD
+                keyAlias RELEASE_KEY_ALIAS
+                keyPassword RELEASE_KEY_PASSWORD
+            }
+        }
     }
 
     buildTypes {
@@ -23,18 +50,26 @@ android {
 
         local{
             debuggable true
-            signingConfig signingConfigs.debug
+            if(project.hasProperty("RELEASE_STORE_FILE")) {
+                signingConfig signingConfigs.debug
+            }
             buildConfigField 'String', 'ENVIRONMENT', '"LOCAL"';
             buildConfigField 'String', 'API_URL', '"http://'+ InetAddress.getLocalHost().getCanonicalHostName() + ':8080/"';
         }
         tst{ // build types may not start with 'test'
             debuggable true
+            if(project.hasProperty("RELEASE_STORE_FILE")) {
+                signingConfig signingConfigs.debug
+            }
 //            signingConfig signingConfigs.release
             buildConfigField 'String', 'ENVIRONMENT', '"TEST"';
             buildConfigField 'String', 'API_URL', '"https://my-service-test.mydomain/"';
         }
         stage{
             debuggable true
+            if(project.hasProperty("RELEASE_STORE_FILE")) {
+                signingConfig signingConfigs.release
+            }
 //            signingConfig signingConfigs.release
             buildConfigField 'String', 'ENVIRONMENT', '"STAGE"';
             buildConfigField 'String', 'API_URL', '"https://my-service-stage.mydomain/"';
@@ -42,6 +77,9 @@ android {
         release {
             debuggable false
             minifyEnabled false
+            if(project.hasProperty("RELEASE_STORE_FILE")) {
+                signingConfig signingConfigs.release
+            }
             //signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField 'String', 'ENVIRONMENT', '"PROD"';
@@ -51,9 +89,15 @@ android {
         task addCurrentDate() {
             android.applicationVariants.all { variant ->
                 variant.outputs.all { output ->
-                    def date = new Date().format("dd-MM-yyyy")
-                    def fileName = variant.name + "_" + date + ".apk"
-                    output.outputFileName = fileName
+                    def date = new Date().format("dd-MM-yyyy_hh_mm_a")
+                    if(variant.name=="release"){
+                        def fileName = variant.name + "_" + date +".apk"
+                        output.outputFileName = fileName
+                    }else {
+                        def fileName = variant.name + "_" + date +"_Aravinth"+".apk"
+                        output.outputFileName = fileName
+                    }
+
                 }
             }
         }
@@ -75,7 +119,52 @@ android {
     buildFeatures {
         dataBinding true
     }
+
+
+
 }
+
+import java.util.regex.Pattern
+def getIncrementedVersionName() {
+    List<String> runTasks = gradle.startParameter.getTaskNames();
+
+    //find version name in manifest
+    def manifestFile = file('src/main/AndroidManifest.xml')
+    def matcher = Pattern.compile('versionName=\"(\\d+)\\.(\\d+)\\.(\\d+)\"').matcher(manifestFile.getText())
+    matcher.find()
+
+    //extract versionName parts
+    def firstPart = Integer.parseInt(matcher.group(1))
+    def secondPart = Integer.parseInt(matcher.group(2))
+    def thirdPart = Integer.parseInt(matcher.group(3))
+
+    //check is runTask release or not
+    // if release - increment version
+    for (String item : runTasks) {
+        if (item.contains("assemble") && item.contains("Release")) {
+            thirdPart++
+            if (thirdPart == 10) {
+                thirdPart = 0;
+                secondPart++
+                if (secondPart == 10) {
+                    secondPart = 0;
+                    firstPart++
+                }
+            }
+        }
+    }
+
+    def versionName = firstPart + "." + secondPart + "." + thirdPart
+
+    // update manifest
+    def manifestContent = matcher.replaceAll('versionName=\"' + versionName + '\"')
+    manifestFile.write(manifestContent)
+
+    println "incrementVersionName = " + versionName
+
+    return versionName
+}
+
 
 dependencies {
 
