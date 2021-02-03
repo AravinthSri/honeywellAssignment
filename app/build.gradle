@@ -19,10 +19,50 @@ android {
     }
 
     buildTypes {
+
+
+        local{
+            debuggable true
+            signingConfig signingConfigs.debug
+            buildConfigField 'String', 'ENVIRONMENT', '"LOCAL"';
+            buildConfigField 'String', 'API_URL', '"http://'+ InetAddress.getLocalHost().getCanonicalHostName() + ':8080/"';
+        }
+        tst{ // build types may not start with 'test'
+            debuggable true
+//            signingConfig signingConfigs.release
+            buildConfigField 'String', 'ENVIRONMENT', '"TEST"';
+            buildConfigField 'String', 'API_URL', '"https://my-service-test.mydomain/"';
+        }
+        stage{
+            debuggable true
+//            signingConfig signingConfigs.release
+            buildConfigField 'String', 'ENVIRONMENT', '"STAGE"';
+            buildConfigField 'String', 'API_URL', '"https://my-service-stage.mydomain/"';
+        }
         release {
+            debuggable false
+            minifyEnabled false
+            //signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField 'String', 'ENVIRONMENT', '"PROD"';
+            buildConfigField 'String', 'API_URL', '"https://my-service.mydomain/"';
+        }
+
+        task addCurrentDate() {
+            android.applicationVariants.all { variant ->
+                variant.outputs.all { output ->
+                    def date = new Date().format("dd-MM-yyyy")
+                    def fileName = variant.name + "_" + date + ".apk"
+                    output.outputFileName = fileName
+                }
+            }
+        }
+
+
+       /* release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
+        }*/
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

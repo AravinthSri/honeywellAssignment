@@ -24,6 +24,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
+
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/tieSearch"
                 android:layout_width="match_parent"
@@ -77,6 +78,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             />
+        
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tvNoRecords"
